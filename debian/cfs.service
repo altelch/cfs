@@ -1,0 +1,24 @@
+[Unit]
+Description=Cluster filesystem
+ConditionFileIsExecutable=/usr/bin/cfsd
+Wants=corosync.service
+Wants=systemd-timesyncd.service
+Before=corosync.service
+Before=cron.service
+After=network.target
+After=sys-fs-fuse-connections.mount
+After=systemd-timesyncd.service
+DefaultDependencies=no
+Before=shutdown.target
+Conflicts=shutdown.target
+
+[Service]
+EnvironmentFile=-/etc/default/cfs
+ExecStart=/usr/bin/cfsd $DAEMON_OPTS
+KillMode=mixed
+TimeoutStopSec=10
+Type=forking
+PIDFile=/var/run/cfsd.pid
+
+[Install]
+WantedBy=multi-user.target

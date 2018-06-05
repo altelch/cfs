@@ -1,0 +1,5 @@
+cfs (4.0-40) unstable; urgency=medium
+
+  * rebrand to cfs to create a more generic version of pve-cluster
+
+ -- RHRK Support Team <hotline@rhrk.uni-kl.de>  Wed, 30 May 2018 7:23:36 +0200

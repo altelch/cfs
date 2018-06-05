@@ -1,0 +1,22 @@
+Source: cfs
+Section: admin
+Priority: optional
+Maintainer: RHRK Support Team <hotline@rhrk.uni-kl.de>
+Build-Depends: debhelper (>= 9), autotools-dev, libsqlite3-dev, sqlite3, libfuse-dev (>= 2.9.2-4), libcorosync-common-dev (>= 2.3.4-1), libqb-dev (>= 0.17.1-1), libglib2.0-dev (>= 2.42.1-1), check
+Standards-Version: 3.7.3
+
+Package: cfs
+Architecture: any
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${perl:Depends}, rsync, libsqlite3-0, sqlite3, libfuse2 (>= 2.9.2-4), fuse, corosync (>= 2.3.4-1), libqb0 (>= 0.17.1-1), libglib2.0-0 (>= 2.42.1-1), rsyslog, openssl, systemd, lsb-base
+Description: Cluster Infrastructure for shared config directory
+ This package contains a distributed filesystem to store configuration data on 
+ all nodes.
+
+Package: cfs-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Depends: cfs (= ${binary:Version})
+Description: debug Cluster Infrastructure
+ This package contains the debug symbols.

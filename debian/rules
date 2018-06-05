@@ -1,0 +1,37 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+BUILDROOT := $(shell pwd)
+
+%:
+	dh $@ --with=systemd
+
+override_dh_strip:
+	dh_strip --dbg-package=cfs-dbg
+
+override_dh_auto_configure:
+
+	./autogen.sh
+
+	./configure --prefix=/usr
+
+override_dh_systemd_start:
+	dh_systemd_start --restart-after-upgrade
+
+override_dh_auto_install:
+
+	make -j1 install DESTDIR=../debian/cfs
+
+override_dh_install:
+
+	dh_install
+
+override_dh_installinit:
+
+	dh_installinit -R

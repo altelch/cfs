@@ -1,0 +1,283 @@
+'\" t
+.\"     Title: cfsd
+.\"    Author: Proxmox Server Solutions Gmbh \m[blue]\fBwww.proxmox.com\fR\m[]
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: Thu Dec  7 14:26:15 UTC 2017
+.\"    Manual: Proxmox VE Documentation
+.\"    Source: \ \& 5.1
+.\"  Language: English
+.\"
+.TH "CFSD" "8" "Thu Dec 7 14:26:15 UTC 2017" "\ \& 5\&.1" "Proxmox VE Documentation"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+cfsd \- Cluster File System
+.SH "SYNOPSIS"
+.sp
+\fBcfsd\fR [OPTIONS]
+.sp
+Help Options:
+.PP
+\-h, \-\-help
+.RS 4
+Show help options
+.RE
+.sp
+Application Options:
+.PP
+\-d, \-\-debug
+.RS 4
+Turn on debug messages
+.RE
+.PP
+\-f, \-\-foreground
+.RS 4
+Do not daemonize server
+.RE
+.PP
+\-l, \-\-local
+.RS 4
+Force local mode (ignore corosync\&.conf, force quorum)
+.RE
+.sp
+This service is usually started and managed using systemd toolset\&. The service is called \fIcfsd\fR\&.
+.sp
+.nf
+systemctl start cfs
+.fi
+.sp
+.nf
+systemctl stop cfs
+.fi
+.sp
+.nf
+systemctl status cfs
+.fi
+.SH "DESCRIPTION"
+.sp
+The Cluster file system (\(lqcfsd\(rq) is a database\-driven file system for storing configuration files, replicated in real time to all cluster nodes using corosync\&.
+.sp
+Although the file system stores all data inside a persistent database on disk, a copy of the data resides in RAM\&. That imposes restriction on the maximum size, which is currently 30MB\&. This is still enough to store the configuration of several thousand virtual machines\&.
+.sp
+This system provides the following advantages:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+seamless replication of all configuration to all nodes in real time
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+provides strong consistency checks
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+read\-only when a node loses quorum
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+includes a distributed locking mechanism
+.RE
+.SH "POSIX COMPATIBILITY"
+.sp
+The file system is based on FUSE, so the behavior is POSIX like\&. But some feature are simply not implemented, because we do not need them:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+you can just generate normal files and directories, but no symbolic links, \&...
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+you can\(cqt rename non\-empty directories\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+you can\(cqt change file permissions (permissions are based on path)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+O_EXCL
+creates were not atomic (like old NFS)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+O_TRUNC
+creates are not atomic (FUSE restriction)
+.RE
+.SH "FILE ACCESS RIGHTS"
+.sp
+All files and directories are owned by user root and have group root\&. Only root has write permissions\&.
+.sp
+We use the \m[blue]\fBCorosync Cluster Engine\fR\m[]\&\s-2\u[1]\d\s+2 for cluster communication, and \m[blue]\fBSQlite\fR\m[]\&\s-2\u[2]\d\s+2 for the database file\&. The file system is implemented in user space using \m[blue]\fBFUSE\fR\m[]\&\s-2\u[3]\d\s+2\&.
+.SH "FILE SYSTEM LAYOUT"
+.sp
+The file system is mounted at:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+/etc/cfs
+.fi
+.if n \{\
+.RE
+.\}
+.sp 1
+.SS "Special status files for debugging (JSON)"
+.sp
+T{
+\&.version
+T}:T{
+.sp
+File versions (to detect file modifications)
+T}
+T{
+.sp
+\&.members
+T}:T{
+.sp
+Info about cluster members
+T}
+T{
+.sp
+\&.clusterlog
+T}:T{
+.sp
+Cluster log (last 50 entries)
+T}
+T{
+.sp 1
+.SS "Enable/Disable debugging"
+.sp
+You can enable verbose syslog messages with:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+echo "1" >/etc/cfs/\&.debug
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+And disable verbose syslog messages with:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+echo "0" >/etc/cfs/\&.debug
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+.RE
+.SH "COPYRIGHT AND DISCLAIMER"
+.sp
+Copyright \(co 2007\-2017 Proxmox Server Solutions GmbH
+.sp
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version\&.
+.sp
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE\&. See the GNU Affero General Public License for more details\&.
+.sp
+You should have received a copy of the GNU Affero General Public License along with this program\&. If not, see \m[blue]\fBhttp://www\&.gnu\&.org/licenses/\fR\m[]
+.SH "AUTHOR"
+.PP
+\fBProxmox Server Solutions Gmbh
+  \fR\fB\m[blue]\fBwww\&.proxmox\&.com\fR\m[]\fR\fB
+  \fR
+.SH "NOTES"
+.IP " 1." 4
+Corosync Cluster Engine
+.RS 4
+\%http://www.corosync.org
+.RE
+.IP " 2." 4
+SQlite
+.RS 4
+\%http://www.sqlite.org
+.RE
+.IP " 3." 4
+FUSE
+.RS 4
+\%http://fuse.sourceforge.net
+.RE
